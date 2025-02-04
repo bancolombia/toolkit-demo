@@ -1,16 +1,19 @@
 name: 'Init Config Files'
 description: 'GitHub Action que crea archivos de configuración inicial si no existen'
 inputs:
-  token:
+  TOKEN:
     description: 'Token para hacer commit y push. Se recomienda usar el GITHUB_TOKEN de GitHub'
     required: true
-  branch:
+  BRANCH:
     description: 'Nombre de la rama a la que se hará push. Si no se especifica, se usará la rama actual del workflow.'
-    required: false
+    required: true
 runs:
   using: "composite"
   steps:
     - name: Crear archivos de configuración
+      env:
+        VAR_TOKEN: ${{ inputs.TOKEN }}
+        VAR_BRANCH: ${{ inputs.TOKEN }}
       shell: bash
       run: |
         echo "Iniciando la creación de archivos de configuración..."
@@ -84,14 +87,14 @@ runs:
 
         # Configurar la URL remota usando el token proporcionado
         REMOTE_URL=$(git remote get-url origin)
-        AUTH_REMOTE_URL=$(echo "$REMOTE_URL" | sed -e "s/https:\/\/github.com/https:\/\/x-access-token:${INPUT_TOKEN}@github.com/")
+        AUTH_REMOTE_URL=$(echo "$REMOTE_URL" | sed -e "s/https:\/\/github.com/https:\/\/x-access-token:$VAR_TOKEN@github.com/")
         git remote set-url origin "$AUTH_REMOTE_URL"
 
         # Determinar la rama de push: si se pasa un input 'branch' se usa ese valor, de lo contrario se extrae de GITHUB_REF
-        if [ -z "$INPUT_BRANCH" ]; then
+        if [ -z "$VAR_BRANCH" ]; then
           branch=${GITHUB_REF#refs/heads/}
         else
-          branch="$INPUT_BRANCH"
+          branch="$VAR_BRANCH"
         fi
 
         echo "Haciendo push a la rama ${branch}..."
