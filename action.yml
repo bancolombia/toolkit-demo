@@ -13,7 +13,7 @@ runs:
     - name: Crear archivos de configuración
       env:
         VAR_TOKEN: ${{ inputs.TOKEN }}
-        VAR_BRANCH: ${{ inputs.TOKEN }}
+        VAR_BRANCH: ${{ inputs.BRANCH }}
       shell: bash
       run: |
         echo "Iniciando la creación de archivos de configuración..."
