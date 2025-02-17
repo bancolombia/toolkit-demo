@@ -10,6 +10,8 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Verificar contenido del directorio
+      run: ls -R
     - name: Crear archivos de configuración
       env:
         VAR_TOKEN: ${{ inputs.TOKEN }}
