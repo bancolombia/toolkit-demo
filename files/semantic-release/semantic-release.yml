@@ -1,0 +1,45 @@
+name: Semantic-Release
+
+on:
+  push:
+    branches:
+      - trunk
+      - main
+      - '**.x'
+      - 'stable/**'
+    paths-ignore:
+      - 'docs/**'  # Ignorar cambios en la documentación
+
+permissions:
+  contents: read # Necesario solo para el checkout inicial
+
+jobs:
+  release:
+    name: Release
+    runs-on:
+      group: Temporal-Github
+
+    permissions:
+      contents: write # Para publicar una nueva versión
+      issues: write # Para comentar en issues relacionados
+      pull-requests: write # Para comentar en PRs relacionados
+      id-token: write # Para autenticación OIDC con npm
+
+    env:
+      VERSION_FILE: "" # Define aquí el archivo de versión si es necesario
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: "lts/*"
+
+      - name: Run Semantic Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_COMMITTER_EMAIL: 'oficina_open_source@bancolombia.com.co'
+          GIT_AUTHOR_EMAIL: 'oficina_open_source@bancolombia.com.co'
+        run: npx -p semantic-release@23.1.1 -p @semantic-release/git -p @semantic-release/changelog -p @semantic-release/exec semantic-release

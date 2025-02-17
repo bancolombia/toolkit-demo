@@ -15,87 +15,15 @@ runs:
         VAR_TOKEN: ${{ inputs.TOKEN }}
         VAR_BRANCH: ${{ inputs.BRANCH }}
       shell: bash
-      run: |
-        echo "Iniciando la creación de archivos de configuración..."
-
-        # Crear README.md si no existe
-        if [ ! -f README.md ]; then
-          echo "# Proyecto" > README.md
-          echo "Este archivo fue creado automáticamente." >> README.md
-          echo "Archivo README.md creado."
-        else
-          echo "README.md ya existe."
-        fi
-
-        # Crear LICENSE.md si no existe
-        if [ ! -f LICENSE.md ]; then
-          echo "Licencia: MIT" > LICENSE.md
-          echo "Archivo LICENSE.md creado."
-        else
-          echo "LICENSE.md ya existe."
-        fi
-
-        # Crear GETTINGSTARTED.md si no existe
-        if [ ! -f GETTINGSTARTED.md ]; then
-          echo "# Guía de inicio" > GETTINGSTARTED.md
-          echo "Archivo GETTINGSTARTED.md creado."
-        else
-          echo "GETTINGSTARTED.md ya existe."
-        fi
-
-        # Crear CONTRIBUTING.md si no existe
-        if [ ! -f CONTRIBUTING.md ]; then
-          echo "# Cómo contribuir" > CONTRIBUTING.md
-          echo "Archivo CONTRIBUTING.md creado."
-        else
-          echo "CONTRIBUTING.md ya existe."
-        fi
-
-        # Crear COMMIT_RULES.md si no existe
-        if [ ! -f COMMIT_RULES.md ]; then
-          echo "# Reglas de commit" > COMMIT_RULES.md
-          echo "Archivo COMMIT_RULES.md creado."
-        else
-          echo "COMMIT_RULES.md ya existe."
-        fi
-
-        # Crear CODE_OF_CONDUCT.md si no existe
-        if [ ! -f CODE_OF_CONDUCT.md ]; then
-          echo "# Código de conducta" > CODE_OF_CONDUCT.md
-          echo "Archivo CODE_OF_CONDUCT.md creado."
-        else
-          echo "CODE_OF_CONDUCT.md ya existe."
-        fi
-
-        # Crear .gitignore si no existe
-        if [ ! -f .gitignore ]; then
-          echo "node_modules/" > .gitignore
-          echo "Archivo .gitignore creado."
-        else
-          echo ".gitignore ya existe."
-        fi
-
-        echo "Configurando Git..."
-        git config --global user.email "action@github.com"
-        git config --global user.name "GitHub Action"
-
-        echo "Agregando cambios..."
-        git add .
-
-        echo "Haciendo commit..."
-        git commit -m "Agregar archivos de configuración inicial" || echo "No hay cambios para commitear"
-
-        # Configurar la URL remota usando el token proporcionado
-        REMOTE_URL=$(git remote get-url origin)
-        AUTH_REMOTE_URL=$(echo "$REMOTE_URL" | sed -e "s/https:\/\/github.com/https:\/\/x-access-token:$VAR_TOKEN@github.com/")
-        git remote set-url origin "$AUTH_REMOTE_URL"
-
-        # Determinar la rama de push: si se pasa un input 'branch' se usa ese valor, de lo contrario se extrae de GITHUB_REF
-        if [ -z "$VAR_BRANCH" ]; then
-          branch=${GITHUB_REF#refs/heads/}
-        else
-          branch="$VAR_BRANCH"
-        fi
-
-        echo "Haciendo push a la rama ${branch}..."
-        git push origin HEAD:"${branch}"
+      run: scripts/create_md_files.sh
+    - name: Setup Node.js
+      env:
+        GH_TOKEN: ${{ inputs.TOKEN }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: "lts/*"
+    - name: Install Semantic-Release
+      env:
+        VAR_NAME_REPOSITORY: ${{ github.repository }}
+      run: scripts/install_semantic_release.sh
+      shell: bash
