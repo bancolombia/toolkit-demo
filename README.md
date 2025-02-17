@@ -15,6 +15,8 @@ Esta GitHub Action crea, si no existen, los siguientes archivos de configuració
 Agrega la acción a tu workflow de GitHub Actions. Un ejemplo de workflow sería:
 
 ```yaml
+name: Toolkit
+on: workflow_dispatch
 jobs:
   init-config:
     runs-on: ubuntu-latest
@@ -26,3 +28,5 @@ jobs:
         uses: tu-usuario/init-config-action@v1.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          branch: 'rama-ejemplo'
+```
