@@ -15,7 +15,7 @@ runs:
         VAR_TOKEN: ${{ inputs.TOKEN }}
         VAR_BRANCH: ${{ inputs.BRANCH }}
       shell: bash
-      run: scripts/create_md_files.sh
+      run: ${{ github.action_path }}/scripts/create_md_files.sh
     - name: Setup Node.js
       env:
         GH_TOKEN: ${{ inputs.TOKEN }}
@@ -25,5 +25,5 @@ runs:
     - name: Install Semantic-Release
       env:
         VAR_NAME_REPOSITORY: ${{ github.repository }}
-      run: scripts/install_semantic_release.sh
+      run: ./scripts/install_semantic_release.sh
       shell: bash
