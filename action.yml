@@ -10,15 +10,12 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Verificar contenido del directorio
-      shell: bash
-      run: ls -R
     - name: Crear archivos de configuración
       env:
         VAR_TOKEN: ${{ inputs.TOKEN }}
         VAR_BRANCH: ${{ inputs.BRANCH }}
       shell: bash
-      run: ./scripts/create_md_files.sh
+      run: ${{ github.action_path }}/scripts/create_md_files.sh
     - name: Setup Node.js
       env:
         GH_TOKEN: ${{ inputs.TOKEN }}
