@@ -25,5 +25,6 @@ runs:
     - name: Install Semantic-Release
       env:
         VAR_NAME_REPOSITORY: ${{ github.repository }}
+        VAR_LOCAL_PATH: ${{ github.action_path }}
       run: ${{ github.action_path }}/scripts/install_semantic_release.sh
       shell: bash
