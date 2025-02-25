@@ -26,5 +26,7 @@ runs:
       env:
         VAR_NAME_REPOSITORY: ${{ github.repository }}
         VAR_LOCAL_PATH: ${{ github.action_path }}
+        VAR_TOKEN: ${{ inputs.TOKEN }}
+        VAR_BRANCH: ${{ inputs.BRANCH }}
       run: ${{ github.action_path }}/scripts/install_semantic_release.sh
       shell: bash
