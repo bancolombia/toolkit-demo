@@ -1,49 +1,40 @@
 #!/bin/bash
 set -e
 
-# Cambiar al directorio del repositorio
-if [ -z "$GITHUB_WORKSPACE" ]; then
-  echo "La variable GITHUB_WORKSPACE no está definida. Asegúrate de ejecutar actions/checkout."
-  exit 1
-fi
-
+# Cambiar al directorio del repositorio clonado
 cd "$GITHUB_WORKSPACE"
 
-# Determinar la rama a usar. Si VAR_BRANCH no está definida, se extrae de GITHUB_REF.
-BRANCH="${VAR_BRANCH:-${GITHUB_REF#refs/heads/}}"
+# Define la rama por defecto y la rama destino
+DEFAULT_BRANCH="main"
+BRANCH_NAME="${VAR_BRANCH:-feature/test-semantic}"
 
-# Actualizar la rama local con los cambios remotos
-echo "Actualizando la rama ${BRANCH}..."
-git pull origin "${BRANCH}" || echo "No se pudo actualizar, continúo..."
+# Obtén el último commit de la rama principal
+COMMIT_SHA=$(git rev-parse origin/$DEFAULT_BRANCH)
 
-# Copiar los archivos de configuración de semantic release a las ubicaciones deseadas.
-# Ajusta las rutas según la estructura de tu repositorio.
-echo "Copiando archivos de configuración..."
-# Ejemplo: Crea el directorio de destino si no existe
+echo "Creando la rama ${BRANCH_NAME} a partir de ${DEFAULT_BRANCH} (commit ${COMMIT_SHA})..."
+git checkout "$COMMIT_SHA"
+git switch --create "$BRANCH_NAME"
+
+# Sincroniza la carpeta de workflows con la de la rama principal para evitar problemas de permisos
+echo "Sincronizando archivos de workflows desde origin/${DEFAULT_BRANCH}..."
+git checkout origin/$DEFAULT_BRANCH -- .github/workflows
+
+# Copia los archivos de configuración de semantic-release que deseas subir.
+echo "Copiando archivos de configuración de semantic-release..."
+# Crea el directorio de destino para los archivos (ajusta según tu estructura)
 mkdir -p "./semantic-release"
 cp "$GITHUB_ACTION_PATH/files/semantic-release/create-release-branch.js" "./semantic-release/create-release-branch.js"
 cp "$GITHUB_ACTION_PATH/files/semantic-release/release.config.js" "./release.config.js"
 cp "$GITHUB_ACTION_PATH/files/semantic-release/release-rules.js" "./semantic-release/release-rules.js"
 cp "$GITHUB_ACTION_PATH/files/semantic-release/writerChangelog.js" "./semantic-release/writerChangelog.js"
-mkdir -p "./.github/workflows"
+# Para el workflow, lo copiamos en .github/workflows
 cp "$GITHUB_ACTION_PATH/files/semantic-release/semantic-release.yml" "./.github/workflows/semantic-release.yml"
 
-# Configurar Git
-echo "Configurando Git..."
-git config --global user.email "action@github.com"
-git config --global user.name "GitHub Action"
-
-# Agregar y commitear los cambios
-echo "Agregando cambios..."
+# Agrega y comitea los cambios
+echo "Agregando y commiteando cambios..."
 git add .
-echo "Realizando commit..."
-git commit -m "Feat: Agregar configuración de semantic release" || echo "No hay cambios para commitear"
+git commit -m "chore: Agregar archivos de semantic-release y sincronizar workflows" || echo "No hay cambios para commitear"
 
-# Configurar la URL remota usando el token para autenticación
-REMOTE_URL=$(git remote get-url origin)
-AUTH_REMOTE_URL=$(echo "$REMOTE_URL" | sed -e "s/https:\/\/github.com/https:\/\/x-access-token:${VAR_TOKEN}@github.com/")
-git remote set-url origin "$AUTH_REMOTE_URL"
-
-# Hacer push a la rama correspondiente
-echo "Haciendo push a la rama ${BRANCH}..."
-git push origin HEAD:"${BRANCH}"
+# Push de la rama actualizada
+echo "Haciendo push a la rama ${BRANCH_NAME}..."
+git push origin "$BRANCH_NAME"
